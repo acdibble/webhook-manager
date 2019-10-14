@@ -11,7 +11,8 @@ const server = http.createServer(async (req, res) => {
   try {
     payload = await verifyPayload(req);
 
-    await deployPayload(payload);
+    deployPayload(payload).catch(console.error);
+
     res.statusCode = 204;
   } catch (e) {
     if (e.message === 'hashes do not match') {
