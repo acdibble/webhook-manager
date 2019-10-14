@@ -11,7 +11,6 @@ const server = http.createServer(async (req, res) => {
   let payload = null;
   try {
     payload = await verifyPayload(req);
-    console.log(payload);
     res.writeHead(204);
 
     const {
