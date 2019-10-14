@@ -9,7 +9,7 @@ const {
 const server = http.createServer((req, res) => {
   console.log(req.headers);
   let data = Buffer.alloc(0);
-  const hmac = crypto.createHmac('sha1', Buffer.from(SECRET, 'hex'));
+  const hmac = crypto.createHmac('sha1', SECRET);
 
   req.on('data', (chunk) => {
     hmac.update(chunk);
