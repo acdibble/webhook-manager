@@ -1,40 +1,27 @@
 const http = require('http');
-const { execFile } = require('child_process');
 const verifyPayload = require('./helpers/verifyPayload');
+const deployPayload = require('./helpers/deployPayload');
 
-const {
-  WEBHOOK_PORT: PORT,
-  WEBHOOK_SCRIPT_FILE: SCRIPT = `${__dirname}/test/test.sh`,
-} = process.env;
+const { WEBHOOK_PORT: PORT } = process.env;
+
+const HEADERS = { 'content-type': 'application/json' };
 
 const server = http.createServer(async (req, res) => {
   let payload = null;
   try {
     payload = await verifyPayload(req);
-    res.writeHead(204);
 
-    const {
-      ref,
-      ref_type: refType,
-      repository: {
-        name: repo,
-      },
-    } = payload;
-
-    execFile('sh', [SCRIPT, ref, refType, repo], (err, stdout, stderr) => {
-      if (err) {
-        console.error(err);
-      }
-
-      if (stdout) console.log(stdout);
-      if (stderr) console.error(stderr);
-    });
+    await deployPayload(payload);
+    res.statusCode = 204;
   } catch (e) {
     if (e.message === 'hashes do not match') {
-      res.writeHead(401);
+      res.writeHead(401, HEADERS);
     } else {
-      res.writeHead(500);
+      console.error(e);
+      res.writeHead(500, HEADERS);
     }
+
+    res.write(JSON.stringify({ message: e.message, code: e.code }));
   }
   res.end();
 });

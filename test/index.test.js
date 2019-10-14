@@ -25,6 +25,7 @@ describe('server', () => {
       .send(payload);
 
     expect(response.status).to.eql(401);
+    expect(response.body).to.eql({ message: 'hashes do not match' });
   });
 
   it('returns an error if the body is unparsable', async () => {
@@ -34,5 +35,24 @@ describe('server', () => {
       .send('payload');
 
     expect(response.status).to.eql(500);
+    expect(response.body).to.eql({ message: 'Unexpected token p in JSON at position 0' });
+  });
+
+  it('returns the exit code from the script if given', async () => {
+    const oldScript = process.env.WEBHOOK_SCRIPT_FILE;
+    process.env.WEBHOOK_SCRIPT_FILE = `${__dirname}/bad.sh`;
+
+    const response = await chai.request(server)
+      .post('/')
+      .set('X-Hub-Signature', 'sha1=8b8621e3821fbcd388966e950c34cad55eab2a94')
+      .send(payload);
+
+    process.env.WEBHOOK_SCRIPT_FILE = oldScript;
+
+    expect(response.status).to.eql(500);
+    expect(response.body).to.eql({
+      code: 13,
+      message: `Command failed: sh ${__dirname}/bad.sh v0.7.1 tag server\n`,
+    });
   });
 });
