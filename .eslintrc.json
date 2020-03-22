@@ -42,6 +42,10 @@
         "@typescript-eslint/semi": [
             "error"
         ],
+        "no-unused-expressions": "off",
+        "@typescript-eslint/no-unused-expressions": [
+            "error"
+        ],
         "indent": "off",
         "@typescript-eslint/indent": [
             "error",

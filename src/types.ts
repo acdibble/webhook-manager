@@ -95,9 +95,33 @@ interface GithubRepository {
   default_branch: string;
 }
 
-enum WebhookEvent {
-  CheckRun = 'check_run'
-}
+type WebhookEvent = 'check_run'
+| 'check_suite'
+| 'create'
+| 'delete'
+| 'deployment'
+| 'deployment_status'
+| 'fork'
+| 'gollum'
+| 'issues'
+| 'issue_comment'
+| 'label'
+| 'milestone'
+| 'page_build'
+| 'project'
+| 'project_card'
+| 'project_column'
+| 'public'
+| 'pull_request'
+| 'pull_request_review'
+| 'pull_request_review_comment'
+| 'push'
+| 'registry_package'
+| 'release'
+| 'repository'
+| 'repository_dispatch'
+| 'status'
+| 'watch';
 
 export interface WebhookPayload {
   zen: string;
@@ -124,6 +148,74 @@ export interface WebhookPayload {
       status: string;
       message: string | null;
     };
+  };
+  repository: GithubRepository;
+  sender: GithubUser;
+}
+
+type Permission = 'read' | 'write';
+
+interface Commit {
+  id: string;
+  tree_id: string;
+  message: string;
+  timestamp: string;
+  author: {
+    name: string;
+    email: string;
+  };
+  committer: {
+    name: string;
+    email: string;
+  };
+}
+
+export interface CheckSuitePayload {
+  action: 'completed' | 'queued';
+  check_suite: {
+    id: 538695795;
+    node_id: string;
+    head_branch: string;
+    head_sha: string;
+    status: 'completed' | 'queued';
+    conclusion: 'success';
+    url: string;
+    before: string;
+    after: string;
+    pull_requests: [];
+    app: {
+      id: number;
+      slug: string;
+      node_id: string;
+      owner: GithubUser;
+      name: string;
+      description: string;
+      external_url: string;
+      html_url: string;
+      created_at: string;
+      updated_at: string;
+      permissions: {
+        actions: Permission;
+        checks: Permission;
+        contents: Permission;
+        deployments: Permission;
+        issues: Permission;
+        metadata: Permission;
+        packages: Permission;
+        pages: Permission;
+        pull_requests: Permission;
+        repository_hooks: Permission;
+        repository_projects: Permission;
+        statuses: Permission;
+        vulnerability_alerts: Permission;
+      };
+      events: WebhookEvent[];
+    };
+    created_at: string;
+    updated_at: string;
+    latest_check_runs_count: number;
+    check_runs_url: string;
+    head_commit: Commit;
   };
   repository: GithubRepository;
   sender: GithubUser;

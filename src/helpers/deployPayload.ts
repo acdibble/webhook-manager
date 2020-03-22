@@ -1,21 +1,28 @@
-// import { execFile, ExecException } from 'child_process';
-import { WebhookPayload } from '../types';
+import { execFile, ExecException } from 'child_process';
+import { CheckSuitePayload } from '../types';
 
-const deployPayload = (payload: WebhookPayload): Promise<void> => new Promise((resolve) => {
-  // const script = process.env.WEBHOOK_SCRIPT_FILE || `${__dirname}/../test/test.sh`;
+const deployPayload = (payload: CheckSuitePayload): Promise<void> => new Promise((resolve, reject) => {
+  const script = process.env.WEBHOOK_SCRIPT_FILE || `${__dirname}/../test/test.sh`;
 
-  console.log(payload);
-  resolve();
+  const {
+    check_suite: { status, conclusion },
+    repository: { name: repo },
+  } = payload;
 
-  //   execFile('sh', [script, ref, refType, repo], (err: ExecException | null, stdout: string, stderr: string) => {
-  //     if (err) {
-  //       return reject(err);
-  //     }
+  if (status !== 'completed' || conclusion !== 'success') {
+    resolve();
+    return;
+  }
 
-//     if (stdout) console.log(stdout);
-//     if (stderr) console.error(stderr);
-//     return resolve();
-//   });
+  execFile('sh', [script, repo], (err: ExecException | null, stdout: string, stderr: string) => {
+    if (err) {
+      return reject(err);
+    }
+
+    if (stdout) console.log(stdout);
+    if (stderr) console.error(stderr);
+    return resolve();
+  });
 });
 
 export default deployPayload;
