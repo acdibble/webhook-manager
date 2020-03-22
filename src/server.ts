@@ -12,7 +12,7 @@ const server = http.createServer(async (req, res) => {
 
     res.statusCode = 204;
   } catch (e) {
-    if (e.message === 'hashes do not match') {
+    if (e instanceof RangeError) {
       res.writeHead(401, HEADERS);
     } else {
       console.error(e);

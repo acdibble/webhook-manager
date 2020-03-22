@@ -14,11 +14,8 @@ const verifyPayload = (req: IncomingMessage): Promise<CheckSuitePayload> => new 
   req.on('end', () => {
     const bodySignature = Buffer.from(`sha1=${hmac.digest().toString('hex')}`);
     const headerSignature = Buffer.from(req.headers['x-hub-signature'] as string);
-    if (!crypto.timingSafeEqual(bodySignature, headerSignature)) {
-      return reject(Error('hashes do not match'));
-    }
-
     try {
+      crypto.timingSafeEqual(bodySignature, headerSignature);
       return resolve(JSON.parse(data.toString('utf8')));
     } catch (e) {
       return reject(e);
