@@ -5,11 +5,11 @@ const deployPayload = (payload: CheckSuitePayload): Promise<void> => new Promise
   const script = process.env.WEBHOOK_SCRIPT_FILE || `${__dirname}/../test/test.sh`;
 
   const {
-    check_suite: { status, conclusion },
+    check_suite: { status, conclusion, head_branch: branch },
     repository: { name: repo },
   } = payload;
 
-  if (status !== 'completed' || conclusion !== 'success') {
+  if (status !== 'completed' || conclusion !== 'success' || branch !== 'master') {
     resolve();
     return;
   }
