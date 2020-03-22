@@ -1,14 +1,15 @@
 import * as crypto from 'crypto';
 import { IncomingMessage } from 'http';
 import { CheckSuitePayload } from '../types';
-import StringWritable from './ConcatStream';
 
 const verifyPayload = (req: IncomingMessage): Promise<CheckSuitePayload> => new Promise((resolve, reject) => {
-  const stream = new StringWritable();
+  let data = Buffer.alloc(0);
   const hmac = crypto.createHmac('sha1', process.env.GITHUB_SECRET as string);
 
-  req.pipe(hmac);
-  req.pipe(stream);
+  req.on('data', (chunk) => {
+    hmac.update(chunk);
+    data = Buffer.concat([data, chunk]);
+  });
 
   req.on('end', () => {
     const bodySignature = Buffer.from(`sha1=${hmac.digest().toString('hex')}`);
@@ -18,7 +19,7 @@ const verifyPayload = (req: IncomingMessage): Promise<CheckSuitePayload> => new 
     }
 
     try {
-      return resolve(JSON.parse(stream.data));
+      return resolve(JSON.parse(data.toString('utf8')));
     } catch (e) {
       return reject(e);
     }
