@@ -6,6 +6,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
+    "build": "rm -rf dist && tsc",
     "test": "GITHUB_TOKEN=8ffd0f8d2fb225ad9618e1f739c6d7e241ddad50 mocha --recursive test/**/*.test.js --exit"
   },
   "devDependencies": {
