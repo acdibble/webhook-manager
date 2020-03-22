@@ -1,11 +1,10 @@
-const crypto = require('crypto');
+import * as crypto from 'crypto';
+import { IncomingMessage } from 'http';
+import { WebhookPayload } from '../types';
 
-const { WEBHOOK_TOKEN: SECRET } = process.env;
-
-
-const verifyPayload = (req) => new Promise((resolve, reject) => {
+const verifyPayload = (req: IncomingMessage): Promise<WebhookPayload> => new Promise((resolve, reject) => {
   let data = Buffer.alloc(0);
-  const hmac = crypto.createHmac('sha1', SECRET);
+  const hmac = crypto.createHmac('sha1', process.env.GITHUB_SECRET as string);
 
   req.on('data', (chunk) => {
     hmac.update(chunk);
@@ -14,7 +13,7 @@ const verifyPayload = (req) => new Promise((resolve, reject) => {
 
   req.on('end', () => {
     const bodySignature = Buffer.from(`sha1=${hmac.digest().toString('hex')}`);
-    const headerSignature = Buffer.from(req.headers['x-hub-signature']);
+    const headerSignature = Buffer.from(req.headers['x-hub-signature'] as string);
     if (!crypto.timingSafeEqual(bodySignature, headerSignature)) {
       return reject(Error('hashes do not match'));
     }
@@ -27,4 +26,4 @@ const verifyPayload = (req) => new Promise((resolve, reject) => {
   });
 });
 
-module.exports = verifyPayload;
+export default verifyPayload;

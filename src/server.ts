@@ -1,15 +1,12 @@
-const http = require('http');
-const verifyPayload = require('./helpers/verifyPayload');
-const deployPayload = require('./helpers/deployPayload');
-
-const { WEBHOOK_PORT: PORT } = process.env;
+import * as http from 'http';
+import verifyPayload from './helpers/verifyPayload';
+import deployPayload from './helpers/deployPayload';
 
 const HEADERS = { 'content-type': 'application/json' };
 
 const server = http.createServer(async (req, res) => {
-  let payload = null;
   try {
-    payload = await verifyPayload(req);
+    const payload = await verifyPayload(req);
 
     deployPayload(payload).catch(console.error);
 
@@ -27,8 +24,4 @@ const server = http.createServer(async (req, res) => {
   res.end();
 });
 
-server.listen(PORT, () => {
-  console.log(`Listening on ${PORT}`);
-});
-
-module.exports = server;
+export default server;
